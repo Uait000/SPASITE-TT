@@ -1,0 +1,380 @@
+import { useState, useEffect } from 'react';
+import { postsApi, type CreatePostPayload, ConflictError, Post, PostCategory, PostStatus } from '@/api/posts'; 
+import { teachersApi } from '@/api/teachers';
+import type { Teacher } from '@/api/teachers';
+import { POST_TAGS } from '@/api/posts';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command';
+import { Check, ChevronsUpDown, Loader2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { useToast } from '@/hooks/use-toast';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover as CalendarPopover, PopoverContent as CalendarPopoverContent, PopoverTrigger as CalendarPopoverTrigger } from '@/components/ui/popover'; 
+import { CalendarIcon } from 'lucide-react';
+import { format } from 'date-fns';
+import { ru } from 'date-fns/locale';
+import RichTextEditor from './RichTextEditor';
+import MultipleFileUpload from './MultipleFileUpload';
+import { Checkbox } from '@/components/ui/checkbox';
+
+interface PostFormProps {
+  open: boolean;
+  onClose: () => void;
+  onSuccess: () => void;
+  editPost?: Post | null;
+  isScheduleUser?: boolean;
+  fixedCategory?: PostCategory; 
+}
+
+export default function PostForm({ open, onClose, onSuccess, editPost, isScheduleUser = false, fixedCategory }: PostFormProps) {
+  const [loading, setLoading] = useState(false);
+  
+  const [teacherList, setTeacherList] = useState<Teacher[]>([]);
+  const [teacherSearch, setTeacherSearch] = useState('');
+  const [isTeacherSearching, setIsTeacherSearching] = useState(false);
+  const [isTeacherPopoverOpen, setIsTeacherPopoverOpen] = useState(false);
+  
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [toBeDeleted, setToBeDeleted] = useState<string[]>([]);
+  const [titleError, setTitleError] = useState<string | null>(null);
+  const { toast } = useToast();
+
+  const [formData, setFormData] = useState<CreatePostPayload & { isDraft: boolean }>({
+    title: '',
+    body: '',
+    author: isScheduleUser ? '' : '', 
+    type: 0,
+    files: [],
+    publish_date: Math.floor(new Date().getTime() / 1000),
+    category: fixedCategory !== undefined ? fixedCategory : PostCategory.News,
+    status: PostStatus.Draft,
+    isDraft: true,
+  });
+
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+
+  const isPrideCategory = fixedCategory === PostCategory.Pride;
+
+  useEffect(() => {
+    if (isScheduleUser || isPrideCategory) return;
+
+    setIsTeacherSearching(true);
+    const timerId = setTimeout(() => {
+      teachersApi.getAll({ search: teacherSearch, limit: 1000 })
+        .then(setTeacherList)
+        .catch((err) => {
+          console.error("Failed to search teachers:", err);
+        })
+        .finally(() => setIsTeacherSearching(false));
+    }, 300); 
+
+    return () => clearTimeout(timerId);
+  }, [teacherSearch, isScheduleUser, isPrideCategory]); 
+
+  useEffect(() => {
+    setTitleError(null);
+    const postDate = editPost ? new Date(editPost.publish_date * 1000) : new Date();
+
+    if (open && editPost) {
+      const fileIds = editPost.files?.map(f => f.id) || [];
+      
+      setFormData({
+        title: editPost.title,
+        body: editPost.body,
+        author: editPost.author,
+        type: editPost.type,
+        files: fileIds,
+        publish_date: editPost.publish_date,
+        category: editPost.category,
+        status: editPost.status || PostStatus.Draft,
+        isDraft: editPost.status === PostStatus.Draft,
+      });
+      setSelectedDate(postDate);
+      setImageFiles([]);
+      setToBeDeleted([]);
+      
+      if (!isScheduleUser && !isPrideCategory) {
+        setTeacherSearch(editPost.author);
+      }
+    } else if (open && !editPost) {
+      const initialDate = new Date();
+      setFormData({
+        title: '', 
+        body: '',
+        author: isScheduleUser ? '' : '',
+        type: 0,
+        files: [],
+        publish_date: Math.floor(initialDate.getTime() / 1000),
+        category: fixedCategory !== undefined ? fixedCategory : PostCategory.News,
+        status: PostStatus.Draft,
+        isDraft: true,
+      });
+      setSelectedDate(initialDate);
+      setImageFiles([]);
+      setToBeDeleted([]);
+      
+      if (!isScheduleUser) {
+        setTeacherSearch('');
+      }
+    }
+  }, [editPost, open, isScheduleUser, fixedCategory, isPrideCategory]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setTitleError(null);
+
+    if (!isPrideCategory) {
+        if (!formData.title.trim()) {
+            toast({ title: 'Ошибка', description: 'Заголовок обязателен', variant: 'destructive' });
+            return;
+        }
+    }
+
+    setLoading(true);
+    try {
+      let finalTitle = formData.title;
+      
+      if (isPrideCategory) {
+          if (!finalTitle.trim() && imageFiles.length > 0) {
+              finalTitle = imageFiles[0].name.replace(/\.[^/.]+$/, "");
+          } else if (!finalTitle.trim()) {
+              finalTitle = "Студент";
+          }
+      }
+
+      const finalPayload: CreatePostPayload = {
+        ...formData,
+        title: finalTitle,
+        author: isPrideCategory ? 'Администрация' : (formData.author || 'Администрация'),
+        body: (isPrideCategory || !formData.body) ? ' ' : formData.body,
+        
+        files: formData.files.filter(file => !toBeDeleted.includes(file)),
+        publish_date: Math.floor(selectedDate.getTime() / 1000), 
+        status: formData.isDraft ? PostStatus.Draft : PostStatus.Published,
+      };
+
+      if (editPost) {
+        await postsApi.update(editPost.id, finalPayload, imageFiles.length > 0 ? imageFiles : undefined);
+        toast({ title: 'Успешно', description: 'Запись обновлена' });
+      } else {
+        await postsApi.create(finalPayload, imageFiles.length > 0 ? imageFiles : undefined);
+        toast({ title: 'Успешно', description: 'Запись создана' });
+      }
+      onSuccess();
+    } catch (error) {
+      if (error instanceof ConflictError) {
+        setTitleError(error.message);
+      } else {
+        toast({ title: 'Ошибка', description: error instanceof Error ? error.message : 'Не удалось сохранить', variant: 'destructive' });
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleClose = () => {
+    onClose();
+  };
+  
+  const handleBodyChange = (value: string) => setFormData({ ...formData, body: value });
+
+  return (
+    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && handleClose()}>
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>{editPost ? 'Редактировать' : 'Создать'}</DialogTitle>
+          <DialogDescription>
+             {isPrideCategory 
+                ? 'Загрузите фотографию студента.' 
+                : 'Заполните поля формы.'}
+          </DialogDescription>
+        </DialogHeader>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          
+          {!isPrideCategory && (
+            <>
+                <div className="space-y-2">
+                    <Label htmlFor="title">Заголовок *</Label>
+                    <Input 
+                    id="title" 
+                    value={formData.title} 
+                    onChange={(e) => setFormData({ ...formData, title: e.target.value })} 
+                    placeholder="Введите заголовок" 
+                    required 
+                    />
+                    {titleError && (
+                    <p className="text-sm font-medium text-destructive">{titleError}</p>
+                    )}
+                </div>
+
+                <RichTextEditor 
+                    value={formData.body} 
+                    onChange={handleBodyChange} 
+                    label="Основной текст" 
+                    placeholder="Текст..." 
+                    rows={8} 
+                />
+            
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {!isScheduleUser && (
+                    <div className="space-y-2">
+                        <Label htmlFor="author">Автор</Label>
+                        <Popover open={isTeacherPopoverOpen} onOpenChange={setIsTeacherPopoverOpen}>
+                        <PopoverTrigger asChild>
+                            <Button
+                            variant="outline"
+                            role="combobox"
+                            aria-expanded={isTeacherPopoverOpen}
+                            className="w-full justify-between"
+                            >
+                            {formData.author
+                                ? formData.author
+                                : "Выберите автора"}
+                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                            <Command>
+                            <CommandInput
+                                placeholder="Поиск..."
+                                value={teacherSearch}
+                                onValueChange={setTeacherSearch} 
+                            />
+                            <CommandList>
+                                {isTeacherSearching && (
+                                <div className="p-2 flex justify-center items-center">
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                </div>
+                                )}
+                                <CommandGroup>
+                                {teacherList.map((teacher) => (
+                                    <CommandItem
+                                    key={teacher.id}
+                                    value={teacher.initials}
+                                    onSelect={() => {
+                                        setFormData({ ...formData, author: teacher.initials });
+                                        setTeacherSearch(teacher.initials); 
+                                        setIsTeacherPopoverOpen(false);
+                                    }}
+                                    >
+                                    <Check
+                                        className={cn(
+                                        "mr-2 h-4 w-4",
+                                        formData.author === teacher.initials ? "opacity-100" : "opacity-0"
+                                        )}
+                                    />
+                                    {teacher.initials}
+                                    </CommandItem>
+                                ))}
+                                </CommandGroup>
+                            </CommandList>
+                            </Command>
+                        </PopoverContent>
+                        </Popover>
+                    </div>
+                    )}
+
+                    {/* Поле выбора типа поста теперь доступно всегда, кроме расписания и гордости */}
+                    {!isScheduleUser && (
+                        <div className="space-y-2">
+                        <Label htmlFor="type">Тип отображения *</Label>
+                        <Select value={formData.type.toString()} onValueChange={(value) => setFormData({ ...formData, type: parseInt(value) })}>
+                            <SelectTrigger>
+                            <SelectValue placeholder="Выберите тип" />
+                            </SelectTrigger>
+                            <SelectContent>
+                            {POST_TAGS.map((tag, index) => (
+                                <SelectItem key={index} value={index.toString()}>
+                                {tag}
+                                </SelectItem>
+                            ))}
+                            </SelectContent>
+                        </Select>
+                        </div>
+                    )}
+                </div>
+            </>
+          )}
+
+          <div className="space-y-2">
+            <Label>Дата создания</Label>
+            <CalendarPopover>
+              <CalendarPopoverTrigger asChild>
+                <Button variant="outline" className="w-full justify-start text-left font-normal">
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {selectedDate ? format(selectedDate, 'PPP', { locale: ru }) : 'Выберите дату'}
+                </Button>
+              </CalendarPopoverTrigger>
+              <CalendarPopoverContent className="w-auto p-0">
+                <Calendar 
+                  mode="single" 
+                  selected={selectedDate} 
+                  onSelect={(date) => date && setSelectedDate(date)} 
+                  initialFocus 
+                />
+              </CalendarPopoverContent>
+            </CalendarPopover>
+          </div>
+
+          <MultipleFileUpload 
+            value={formData.files}
+            onChange={setImageFiles}
+            onDelete={(id) => {
+                setToBeDeleted([...toBeDeleted, id]);
+            }}
+            label={isPrideCategory ? "Фотография студента" : "Изображения"} 
+            maxFiles={100} 
+          />
+          
+          <div className="flex items-center space-x-2 pt-2">
+            <Checkbox
+              id="isDraft"
+              checked={formData.isDraft}
+              onCheckedChange={(checked) => setFormData({ ...formData, isDraft: !!checked })}
+            />
+            <Label htmlFor="isDraft">Черновик (скрыть с сайта)</Label>
+          </div>
+
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={handleClose} disabled={loading}>
+              Отмена
+            </Button>
+            <Button type="submit" disabled={loading}>
+              {loading ? 'Сохранение...' : editPost ? 'Обновить' : 'Создать'}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}

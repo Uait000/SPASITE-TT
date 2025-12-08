@@ -1,0 +1,578 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.file-add-button:hover > * {
+    color: white;
+}
+
+@layer base {
+  :root {
+
+    --background: 0 0% 98%;
+    --foreground: 220 9% 14%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 220 9% 14%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 9% 14%;
+
+
+    --primary: 220 92% 55%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 220 92% 45%;
+
+    
+    --secondary: 220 20% 95%;
+    --secondary-foreground: 220 9% 14%;
+
+    --muted: 220 13% 91%;
+    --muted-foreground: 220 9% 46%;
+
+    --accent: 220 92% 55%;
+    --accent-foreground: 0 0% 100%;
+
+    
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 220 9% 14%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-accent: 220 20% 95%;
+
+    
+    --education-badge: 220 92% 55%;
+    --achievements-badge: 144 52% 47%;
+    --news-badge: 263 83% 57%;
+    --events-badge: 25 95% 53%;
+
+    
+    --anniversary-95: 220 92% 55%;
+    --anniversary-85: 220 70% 65%;
+    --victory-80: 0 84% 60%;
+    --science-start: 220 92% 55%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 220 92% 55%;
+
+    --radius: 8px;
+
+    
+    --gradient-primary: linear-gradient(135deg, hsl(220, 92%, 55%), hsl(220, 92%, 45%));
+    --gradient-anniversary: linear-gradient(135deg, hsl(220, 92%, 55%), hsl(220, 70%, 65%));
+    --gradient-victory: linear-gradient(135deg, hsl(0, 84%, 60%), hsl(15, 84%, 60%));
+
+    
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Montserrat', sans-serif;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@layer components {
+  
+  .nav-item {
+    @apply relative px-4 py-2 text-sm font-medium text-foreground transition-all duration-300 hover:text-primary;
+    
+    &::after {
+      content: '';
+      @apply absolute bottom-0 left-0 h-0.5 w-0 bg-primary transition-all duration-300;
+    }
+    
+    &:hover::after {
+      @apply w-full;
+    }
+    
+    &:hover {
+      transform: translateX(2px);
+    }
+  }
+
+  
+  .sidebar-item {
+    @apply flex items-center gap-3 p-3 text-sm text-sidebar-foreground transition-all duration-300 rounded-lg hover:bg-sidebar-accent hover:text-primary cursor-pointer;
+    
+    &:hover {
+      transform: translateX(5px);
+    }
+  }
+
+  
+  .info-block {
+    @apply bg-gradient-to-br from-white to-primary/5 border-2 border-primary text-primary px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 cursor-pointer shadow-sm;
+    
+    &:hover {
+      @apply bg-primary text-white shadow-lg;
+    }
+  }
+
+
+  .news-card {
+    @apply bg-gradient-to-br from-white to-gray-50/50 rounded-xl shadow-md border border-border/50 overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1;
+  }
+
+ 
+  .fixed-right-panel {
+    position: fixed;
+    top: 4rem; 
+    right: 0;
+    width: 20rem; 
+    height: calc(100vh - 4rem);
+    overflow-y: auto;
+    overflow-x: hidden;
+    background-color: white;
+    border-left: 1px solid hsl(var(--border));
+    box-shadow: -2px 0 8px rgba(0, 0, 0, 0.05);
+    z-index: 30;
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted)) transparent;
+  }
+
+  .fixed-right-panel::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .fixed-right-panel::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .fixed-right-panel::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--muted));
+    border-radius: 3px;
+  }
+
+  .fixed-right-panel::-webkit-scrollbar-thumb:hover {
+    background-color: hsl(var(--muted-foreground));
+  }
+
+  
+  .central-content-area {
+    margin-right: 20rem; 
+  }
+
+  
+  .sidebar-card {
+    @apply rounded-xl p-6 text-white text-center transition-all duration-300 hover:scale-105 shadow-lg cursor-pointer;
+  }
+
+  .sidebar-card-95 {
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(220, 92%, 45%));
+  }
+
+  .sidebar-card-85 {
+    @apply bg-gradient-to-br from-blue-500 to-blue-600;
+  }
+
+  .sidebar-card-victory {
+    @apply bg-gradient-to-br from-red-500 to-red-600;
+  }
+
+  .sidebar-card-science {
+    @apply bg-gradient-to-br from-blue-600 to-blue-700;
+  }
+
+  .sidebar-card-conference {
+    @apply bg-gradient-to-br from-red-500 to-red-600;
+  }
+
+  .sidebar-card-digital {
+    @apply bg-gradient-to-br from-green-500 to-green-600;
+  }
+
+  .sidebar-card-info {
+    @apply bg-gradient-to-br from-purple-500 to-purple-600;
+  }
+
+  .sidebar-card-ministry {
+    @apply bg-gradient-to-br from-indigo-500 to-indigo-600;
+  }
+
+  .sidebar-card-education {
+    @apply bg-gradient-to-br from-pink-500 to-pink-600;
+  }
+
+  .sidebar-card-employers {
+    @apply bg-gradient-to-br from-orange-500 to-orange-600;
+  }
+
+  
+  .badge-education {
+    @apply bg-primary text-white;
+  }
+
+  .badge-achievements {
+    @apply bg-green-500 text-white;
+  }
+
+  .badge-news {
+    @apply bg-purple-600 text-white;
+  }
+
+  .badge-events {
+    @apply bg-orange-500 text-white;
+  }
+
+  
+  .modal-overlay {
+    @apply fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4;
+  }
+
+  .modal-content {
+    @apply bg-white rounded-xl max-w-2xl w-full max-h-[80vh] overflow-y-auto;
+  }
+
+  /* Animations */
+  .fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+  }
+
+  .slide-up {
+    animation: slideUp 0.6s ease-out forwards;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+html.font-size-medium {
+  font-size: 18px !important; 
+}
+html.font-size-large {
+  font-size: 22px !important; 
+}
+
+html.font-size-large main,
+html.font-size-large section,
+html.font-size-large div {
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+html.font-size-large h1,
+html.font-size-large h2,
+html.font-size-large h3,
+html.font-size-large h4,
+html.font-size-large h5 {
+    line-height: 1.2 !important; 
+}
+
+html.font-size-large nav:has(.nav-item),
+html.font-size-large div:has(.nav-item) {
+  flex-wrap: wrap !important;
+  min-height: auto !important; 
+  height: auto !important;
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
+  justify-content: center !important; 
+  gap: 8px !important; 
+}
+
+html.font-size-large .nav-item {
+    flex-shrink: 0 !important; 
+    flex-grow: 0 !important; 
+    white-space: nowrap !important; 
+}
+
+html.font-size-large div:has(.info-block) {
+  flex-wrap: wrap !important;
+  justify-content: center !important; 
+  gap: 16px !important;
+}
+html.font-size-large .info-block {
+  flex-grow: 1 !important;
+  flex-shrink: 1 !important;
+  min-width: 160px !important;
+  flex-basis: 160px !important;
+}
+
+html.contrast-high-contrast body {
+  background-color: #fff !important;
+  color: #000 !important;
+}
+html.contrast-high-contrast * {
+  background-color: transparent !important;
+  color: #000 !important;
+  border-color: #000 !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+html.contrast-high-contrast img,
+html.contrast-high-contrast video,
+html.contrast-high-contrast svg {
+  filter: grayscale(100%); 
+}
+html.contrast-high-contrast a {
+  text-decoration: underline !important;
+  font-weight: bold !important;
+}
+
+html.contrast-inverted body {
+  background-color: #000 !important;
+  color: #fff !important;
+}
+html.contrast-inverted * {
+  background-color: transparent !important;
+  color: #fff !important;
+  border-color: #fff !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+html.contrast-inverted img,
+html.contrast-inverted video,
+html.contrast-inverted svg {
+  filter: invert(100%) grayscale(100%); 
+}
+html.contrast-inverted a {
+  text-decoration: underline !important;
+  color: #00D1FF !important; 
+  font-weight: bold !important;
+}
+
+/* ==========================================================================
+                    ПРОЗРАЧНОСТИ ДЛЯ ВЕРСИИ СЛАБОВИДЯЩИХ
+==========================================================================
+
+/* --- Режим: Высокая контрастность (Черным по белому) --- */
+html.contrast-high-contrast header,
+html.contrast-high-contrast .fixed-right-panel,
+html.contrast-high-contrast .accessibility-panel,
+html.contrast-high-contrast .modal-content,
+/* Контент модального окна из NewsModal.tsx */
+html.contrast-high-contrast div[class*="bg-white"][class*="shadow-2xl"][class*="max-w-4xl"] {
+    background-color: #fff !important;
+}
+
+/* Оверлеи (фоны) модальных окон из NewsModal.tsx */
+html.contrast-high-contrast div[class*="bg-black/60"][class*="z-[60]"],
+html.contrast-high-contrast div[class*="bg-black/90"][class*="z-[70]"] {
+    background-color: rgba(0, 0, 0, 0.85) !important;
+}
+
+
+/* --- Режим: Инвертированный (Белым по черному) --- */
+html.contrast-inverted header,
+html.contrast-inverted .fixed-right-panel,
+html.contrast-inverted .accessibility-panel,
+html.contrast-inverted .modal-content,
+/* Контент модального окна из NewsModal.tsx */
+html.contrast-inverted div[class*="bg-white"][class*="shadow-2xl"][class*="max-w-4xl"] {
+    background-color: #000 !important;
+}
+
+/* Оверлеи (фоны) модальных окон из NewsModal.tsx */
+html.contrast-inverted div[class*="bg-black/60"][class*="z-[60]"],
+html.contrast-inverted div[class*="bg-black/90"][class*="z-[70]"] {
+    background-color: rgba(0, 0, 0, 0.85) !important;
+}
+
+
+html.images-hidden img,
+html.images-hidden video,
+html.images-hidden [style*="background-image"],
+html.images-hidden svg {
+  display: none !important;
+  visibility: hidden !important; 
+}
+
+
+/* Добавьте эти анимации в ваш index.css */
+
+/* Shine animation for ticker */
+@keyframes shine {
+  0% {
+    transform: translateX(-100%) skewX(-15deg);
+  }
+  100% {
+    transform: translateX(200%) skewX(-15deg);
+  }
+}
+
+.animate-shine {
+  animation: shine 3s ease-in-out infinite;
+}
+
+/* Pulse animation for attention */
+@keyframes pulse-gentle {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+.animate-pulse-gentle {
+  animation: pulse-gentle 2s ease-in-out infinite;
+}
+
+/* Smooth fade in for ticker */
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ticker-enter {
+  animation: fadeInDown 0.5s ease-out;
+}
+
+
+
+
+
+
+/* ==========================================================
+   КЛАСС ДЛЯ ОТОБРАЖЕНИЯ КОНТЕНТА ИЗ РЕДАКТОРА (Rich Text)
+   Добавьте этот класс к div, в который вы выводите контент.
+   Пример: <div className="rich-text-content" dangerouslySetInnerHTML={...} />
+========================================================== */
+.rich-text-content {
+  font-size: 1rem;
+  line-height: 1.5; /* Базовый интервал, если не задан другой */
+  color: inherit;
+}
+
+/* Возвращаем стили для списков */
+.rich-text-content ul {
+  list-style-type: disc;
+  margin-left: 1.5rem;
+  margin-bottom: 1rem;
+  margin-top: 0.5rem;
+}
+
+.rich-text-content ol {
+  list-style-type: decimal;
+  margin-left: 1.5rem;
+  margin-bottom: 1rem;
+  margin-top: 0.5rem;
+}
+
+.rich-text-content li {
+  margin-bottom: 0.25rem;
+  padding-left: 0.25rem;
+}
+
+/* Отступы для параграфов */
+.rich-text-content p {
+  margin-bottom: 1rem;
+}
+
+/* Заголовки */
+.rich-text-content h1 { font-size: 2.25rem; font-weight: 700; margin-top: 1.5rem; margin-bottom: 1rem; line-height: 1.2; }
+.rich-text-content h2 { font-size: 1.875rem; font-weight: 600; margin-top: 1.5rem; margin-bottom: 0.75rem; line-height: 1.3; }
+.rich-text-content h3 { font-size: 1.5rem; font-weight: 600; margin-top: 1.25rem; margin-bottom: 0.75rem; }
+.rich-text-content h4 { font-size: 1.25rem; font-weight: 600; margin-top: 1rem; margin-bottom: 0.5rem; }
+
+/* Ссылки */
+.rich-text-content a {
+  color: #2563eb;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.rich-text-content a:hover {
+  color: #1d4ed8;
+}
+
+/* Цитаты */
+.rich-text-content blockquote {
+  border-left: 4px solid #e5e7eb;
+  padding-left: 1rem;
+  font-style: italic;
+  margin-left: 0;
+  margin-right: 0;
+  margin-bottom: 1rem;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
