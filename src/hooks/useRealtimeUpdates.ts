@@ -15,6 +15,7 @@ interface UpdateStatsPayload {
 }
 export const useRealtimeUpdates = () => {
   const queryClient = useQueryClient();
+  console.log(BASE_URL)
 
   useEffect(() => {
     let ws: WebSocket;

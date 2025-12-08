@@ -9,23 +9,23 @@ export default defineConfig(({ mode }) => ({
     port: 8080,
     proxy: {
       '/auth': {
-        target: 'https://ttgt-api-isxb.onrender.com',
+        target: 'https://tih-ttgt.ru',
         changeOrigin: true,
       },
       '/content': {
-        target: 'https://ttgt-api-isxb.onrender.com',
+        target: 'https://tih-ttgt.ru',
         changeOrigin: true,
       },
       '/settings': {
-        target: 'https://ttgt-api-isxb.onrender.com',
+        target: 'https://tih-ttgt.ru',
         changeOrigin: true,
       },
       '/admin/settings': {
-        target: 'https://ttgt-api-isxb.onrender.com',
+        target: 'https://tih-ttgt.ru',
         changeOrigin: true,
       },
       '/admin': {
-        target: 'https://ttgt-api-isxb.onrender.com',
+        target: 'https://tih-ttgt.ru',
         changeOrigin: true,
         bypass: (req, res, options) => {
           // Если браузер просит HTML-страницу, не проксируем,
@@ -38,15 +38,15 @@ export default defineConfig(({ mode }) => ({
         },
       },
       '/api': {
-        target: 'https://ttgt-api-isxb.onrender.com',
+        target: 'https://tih-ttgt.ru',
         changeOrigin: true,
       },
       '/files': {
-        target: 'https://ttgt-api-isxb.onrender.com',
+        target: 'https://tih-ttgt.ru',
         changeOrigin: true,
       },
       '/websocket': {
-        target: 'https://ttgt-api-isxb.onrender.com',
+        target: 'https://tih-ttgt.ru',
         changeOrigin: true,
         ws: true,
         rewrite: (path) => path.replace(/^\/websocket/, '/websocket')

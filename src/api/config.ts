@@ -1,5 +1,5 @@
 const getBaseUrl = () => {
-  return '';
+  return 'https://tih-ttgt.ru';
 };
 
 export const BASE_URL = getBaseUrl();
@@ -12,7 +12,7 @@ export const ZAMENA_ENDPOINT = `${ADMIN_API_PREFIX}/zamena`;
 
 // 2. Публичные (для посетителей)
 export const PUBLIC_POSTS_ENDPOINT = '/content/posts/';
-export const PUBLIC_SETTINGS_ENDPOINT = '/admin/settings'; 
+export const PUBLIC_SETTINGS_ENDPOINT = `${BASE_URL}/settings`; 
 
 
 
