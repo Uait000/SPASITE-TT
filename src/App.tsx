@@ -89,7 +89,7 @@ const AppContent: React.FC = () => {
           <Route path="/courses" element={<Courses />} />
           <Route path="/online-survey" element={<OnlineSurvey />} />
           <Route path="/internal-rules" element={<InternalRules />} />
-          <Route path="/schedule" element={<Schedule />} />
+          <Route path="/raspisaniye" element={<Schedule />} />
           <Route path="/zamena" element={<Zamena />} />
           <Route path="/bell-schedule" element={<BellSchedule />} />
           <Route path="/classroom-layout" element={<ClassroomLayout />} />
